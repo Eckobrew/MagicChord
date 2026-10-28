@@ -58,19 +58,27 @@ MagicChord maps the physical switch plus the capacitive touch surface into an in
 
 ## Building and Running
 
-### Build
-Run the build script from the repository root:
+### 1. Xcode (Recommended)
+Open `MagicChord.xcodeproj` in **Xcode**:
+```bash
+open MagicChord.xcodeproj
+```
+- Select the **MagicChord** scheme.
+- Press **⌘R** to build and run, or **⌘B** to build.
+- The app will build and run directly in your menu bar.
+
+### 2. Command Line (xcodebuild)
+Build directly from terminal using `xcodebuild`:
+```bash
+xcodebuild -project MagicChord.xcodeproj -scheme MagicChord -configuration Release build
+```
+Or run the automated build script:
 ```bash
 ./build.sh
 ```
 
-### Run
-Launch directly:
-```bash
-open build/MagicChord.app
-```
-
-Or install to Applications:
+### Install to Applications
+Copy the built bundle to `/Applications`:
 ```bash
 cp -R build/MagicChord.app /Applications/
 ```

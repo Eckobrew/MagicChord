@@ -3,3 +3,6 @@ build/
 .build/
 *.o
 *.sample.txt
+*.xcuserdata
+xcuserdata/
+DerivedData/
