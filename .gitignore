@@ -1,0 +1,5 @@
+.DS_Store
+build/
+.build/
+*.o
+*.sample.txt
