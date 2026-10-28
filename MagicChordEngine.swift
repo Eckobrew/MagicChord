@@ -166,8 +166,8 @@ final class MagicChordEngine: MultitouchDeviceManagerDelegate {
 
         // --- LEFT FINGER TRANSITIONS ---
         if currentLeftTouch && !self.isLeftDownInOS {
-            // Can chord left if physical switch is down OR right button is currently down
-            if (self.isPhysicalSwitchDown || self.isRightDownInOS) {
+            // Can only chord left if physical switch is currently down
+            if self.isPhysicalSwitchDown {
                 if (preferences.enableRightIntoBothDown && self.isRightDownInOS) || preferences.enableLeftIntoBothDown {
                     self.isLeftDownInOS = true
                     shouldPostLeftDown = true
@@ -181,8 +181,8 @@ final class MagicChordEngine: MultitouchDeviceManagerDelegate {
 
         // --- RIGHT FINGER TRANSITIONS ---
         if currentRightTouch && !self.isRightDownInOS {
-            // Can chord right if physical switch is down OR left button is currently down
-            if (self.isPhysicalSwitchDown || self.isLeftDownInOS) {
+            // Can only chord right if physical switch is currently down
+            if self.isPhysicalSwitchDown {
                 if (preferences.enableLeftIntoBothDown && self.isLeftDownInOS) || preferences.enableRightIntoBothDown {
                     self.isRightDownInOS = true
                     shouldPostRightDown = true
@@ -258,18 +258,29 @@ final class MagicChordEngine: MultitouchDeviceManagerDelegate {
             initialPhysicalButton = nil
 
             let wasLeftDown = isLeftDownInOS
-            isLeftDownInOS = false
+            let wasRightDown = isRightDownInOS
 
-            // IMPORTANT: If right finger is STILL touching the surface, KEEP right button down!
-            // Only release right button if right finger is NOT touching.
-            if isRightDownInOS && !hasRightTouch {
-                isRightDownInOS = false
+            isLeftDownInOS = false
+            isRightDownInOS = false
+
+            // If right was also down, release it as the physical switch unclicked
+            if wasRightDown {
                 shouldPostRightUp = true
             }
 
-            // If left was already released earlier by finger lift, swallow this redundant physical leftMouseUp
+            // If left was already released earlier by finger lift:
             if !wasLeftDown {
-                shouldSwallowEvent = true
+                if wasRightDown {
+                    // Hand-off transition: left was lifted earlier while holding right.
+                    // Now right is released by physical switch up.
+                    // In-place mutate this physical leftMouseUp into rightMouseUp!
+                    event.type = .rightMouseUp
+                    event.setIntegerValueField(.mouseEventButtonNumber, value: 1)
+                    shouldPostRightUp = false // already handled in-place
+                    shouldSwallowEvent = false
+                } else {
+                    shouldSwallowEvent = true
+                }
             }
 
         case .rightMouseDown:
@@ -288,18 +299,29 @@ final class MagicChordEngine: MultitouchDeviceManagerDelegate {
             initialPhysicalButton = nil
 
             let wasRightDown = isRightDownInOS
-            isRightDownInOS = false
+            let wasLeftDown = isLeftDownInOS
 
-            // IMPORTANT: If left finger is STILL touching the surface, KEEP left button down!
-            // Only release left button if left finger is NOT touching.
-            if isLeftDownInOS && !hasLeftTouch {
-                isLeftDownInOS = false
+            isRightDownInOS = false
+            isLeftDownInOS = false
+
+            // If left was also down, release it as the physical switch unclicked
+            if wasLeftDown {
                 shouldPostLeftUp = true
             }
 
-            // If right was already released earlier by finger lift, swallow this redundant physical rightMouseUp
+            // If right was already released earlier by finger lift:
             if !wasRightDown {
-                shouldSwallowEvent = true
+                if wasLeftDown {
+                    // Hand-off transition: right was lifted earlier while holding left.
+                    // Now left is released by physical switch up.
+                    // In-place mutate this physical rightMouseUp into leftMouseUp!
+                    event.type = .leftMouseUp
+                    event.setIntegerValueField(.mouseEventButtonNumber, value: 0)
+                    shouldPostLeftUp = false // already handled in-place
+                    shouldSwallowEvent = false
+                } else {
+                    shouldSwallowEvent = true
+                }
             }
 
         case .mouseMoved:
