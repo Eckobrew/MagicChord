@@ -5,6 +5,7 @@
 
 import Foundation
 import Combine
+import ServiceManagement
 
 final class Preferences: ObservableObject {
     static let shared = Preferences()
@@ -65,6 +66,14 @@ final class Preferences: ObservableObject {
         didSet { UserDefaults.standard.set(synthesizeBothDragEvents, forKey: Keys.synthesizeBothDragEvents) }
     }
 
+    /// When true, MagicChord automatically starts at system login.
+    @Published var startAtLogin: Bool = false {
+        didSet {
+            guard startAtLogin != oldValue else { return }
+            setStartAtLogin(startAtLogin)
+        }
+    }
+
     private init() {
         let defaults = UserDefaults.standard
         defaults.register(defaults: [
@@ -88,6 +97,43 @@ final class Preferences: ObservableObject {
         self.palmRejectionY = defaults.double(forKey: Keys.palmRejectionY)
         self.releaseWhenFingerLifts = defaults.bool(forKey: Keys.releaseWhenFingerLifts)
         self.synthesizeBothDragEvents = defaults.bool(forKey: Keys.synthesizeBothDragEvents)
+        self.startAtLogin = getStartAtLoginStatus()
+    }
+
+    func getStartAtLoginStatus() -> Bool {
+        if #available(macOS 13.0, *) {
+            return SMAppService.mainApp.status == .enabled
+        }
+        return false
+    }
+
+    private func setStartAtLogin(_ enabled: Bool) {
+        if #available(macOS 13.0, *) {
+            let service = SMAppService.mainApp
+            do {
+                if enabled {
+                    if service.status != .enabled {
+                        try service.register()
+                    }
+                } else {
+                    if service.status == .enabled {
+                        try service.unregister()
+                    }
+                }
+            } catch {
+                print("[MagicChord] Failed to update start at login: \(error)")
+            }
+            DispatchQueue.main.async { [weak self] in
+                self?.refreshStartAtLogin()
+            }
+        }
+    }
+
+    func refreshStartAtLogin() {
+        let current = getStartAtLoginStatus()
+        if startAtLogin != current {
+            startAtLogin = current
+        }
     }
 
     func resetToDefaults() {

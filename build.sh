@@ -39,6 +39,7 @@ swiftc \
     -framework Cocoa \
     -framework SwiftUI \
     -framework ApplicationServices \
+    -framework ServiceManagement \
     "${SWIFT_FILES[@]}" \
     -o "$MACOS_DIR/$APP_NAME"
 

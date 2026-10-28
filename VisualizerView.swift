@@ -38,7 +38,7 @@ struct VisualizerView: View {
             footerView
         }
         .padding(20)
-        .frame(width: 660, height: 600)
+        .frame(width: 660, height: 620)
         .background(Color(NSColor.windowBackgroundColor))
         .onAppear {
             checkAccessibility()
@@ -321,6 +321,10 @@ struct VisualizerView: View {
 
             Toggle("Release when finger lifts", isOn: $preferences.releaseWhenFingerLifts)
                 .font(.system(size: 12))
+
+            Toggle("Start at Login", isOn: $preferences.startAtLogin)
+                .font(.system(size: 12))
+                .help("Automatically launch MagicChord when logging into macOS.")
 
             Divider().padding(.vertical, 2)
 

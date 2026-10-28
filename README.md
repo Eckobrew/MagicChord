@@ -51,6 +51,7 @@ MagicChord maps the physical switch plus the capacitive touch surface into an in
 - **Full Drag Conversion**: Dynamically converts drag events when transitioning between left and right holds without unclicking the mechanical switch.
 - **Zero Input Lag**: Direct C callback integration with `MultitouchSupport` and non-blocking event taps.
 - **Palm Rejection**: Discards touches at the bottom base of the mouse to prevent palm contact from triggering accidental chords.
+- **Start at Login**: Seamless integration with macOS System Settings login items to launch automatically on bootup.
 - **Menu Bar Resident**: Lightweight, minimal resource usage (~19MB, 0.1% CPU), runs silently in your menu bar.
 
 ---

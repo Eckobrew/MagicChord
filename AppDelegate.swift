@@ -44,6 +44,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func rebuildMenu() {
+        preferences.refreshStartAtLogin()
         let menu = NSMenu()
 
         // Status Header
@@ -76,6 +77,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         leftIntoBoth.target = self
         leftIntoBoth.state = preferences.enableLeftIntoBothDown ? .on : .off
         menu.addItem(leftIntoBoth)
+
+        menu.addItem(NSMenuItem.separator())
+
+        // Start at Login
+        let startAtLoginItem = NSMenuItem(title: "Start at Login", action: #selector(toggleStartAtLogin), keyEquivalent: "")
+        startAtLoginItem.target = self
+        startAtLoginItem.state = preferences.startAtLogin ? .on : .off
+        menu.addItem(startAtLoginItem)
 
         menu.addItem(NSMenuItem.separator())
 
@@ -118,6 +127,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc private func toggleLeftIntoBoth() {
         preferences.enableLeftIntoBothDown.toggle()
+        rebuildMenu()
+    }
+
+    @objc private func toggleStartAtLogin() {
+        preferences.startAtLogin.toggle()
         rebuildMenu()
     }
 
